@@ -120,24 +120,36 @@ router.post('/register', async (req, res, next) => {
     }
 
     // Create new user
-    const user = await storage.createUser({
+    const createdUser = await storage.createUser({
       username,
       email,
-      password, // Password is hashed in storage.js
+      password,         // Password is hashed in storage.createUser
       full_name: fullName, // Match the field name expected by storage.js
       role: 'user'
     });
 
-    // Remove password from response
-    const { password: _, ...userWithoutPassword } = user;
+    // Verify that a user was actually created
+    if (!createdUser || !createdUser.id) {
+      console.error('User creation failed - no user returned from createUser');
+      return res.status(500).json({
+        success: false,
+        message: 'Registration failed - could not create user'
+      });
+    }
 
-    // Log in the new user
-    req.logIn(userWithoutPassword, (err) => {
+    // Log successful creation for debugging
+    console.log(`User created successfully with id: ${createdUser.id}`);
+
+    // Remove password before sending response
+    const { password: pwd, ...userWithoutPassword } = createdUser;
+
+    // Log in the new user with the ORIGINAL user object
+    req.logIn(createdUser, (err) => {
       if (err) {
         return next(err);
       }
-
-      return res.json({
+      // Respond with a 201 Created status
+      return res.status(201).json({
         success: true,
         user: userWithoutPassword
       });

@@ -61,13 +61,13 @@ async function getUserByEmail(email) {
  * @returns {Promise<object>} Created user
  */
 async function createUser(userData) {
-  // Hash password if provided
   let passwordHash = null;
   if (userData.password) {
     const salt = await bcrypt.genSalt(10);
     passwordHash = await bcrypt.hash(userData.password, salt);
   }
 
+  // Run the INSERT query and wait for it to finish.
   const result = await dbRun(
     `INSERT INTO users (username, password, email, full_name, role, avatar, address, dark_mode)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -83,7 +83,14 @@ async function createUser(userData) {
     ]
   );
 
-  return getUser(result.lastID);
+  // Check that an ID was generated
+  if (!result.lastID) {
+    throw new Error("User creation failed: no lastID returned");
+  }
+
+  // Now wait for and return the newly created user record.
+  const newUser = await getUser(result.lastID);
+  return newUser;
 }
 
 /**

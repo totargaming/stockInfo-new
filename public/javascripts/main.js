@@ -26,7 +26,7 @@ const app = createApp({
     async fetchStocks() {
       this.loading.stocks = true;
       try {
-        const response = await axios.get('/api/stocks/market');
+        const response = await axios.get('/api/stocks/market-summary');
         this.stocks = response.data;
 
         // Also fetch featured stocks if available
