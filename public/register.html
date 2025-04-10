@@ -6,13 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register - StockInfo</title>
   <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="/stylesheets/stock-components.css">
+  <link rel="stylesheet" href="/stylesheets/auth.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 
 <body>
-  <div id="register-app">
+  <div id="register-app" class="auth-page">
+    <button class="theme-toggle" @click="toggleTheme">
+      <i :class="isDarkMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
+      <span>{{ isDarkMode ? 'Light Mode' : 'Dark Mode' }}</span>
+    </button>
+
     <div class="auth-container">
       <div class="auth-box register-box">
         <div class="auth-header">
@@ -91,10 +98,13 @@
             username: '',
             email: '',
             password: '',
-            fullName: ''
+            fullName: '',
+            address: '',
+            darkMode: false
           },
           loading: false,
-          error: null
+          error: null,
+          isDarkMode: localStorage.getItem('theme') === 'dark'
         };
       },
       methods: {
@@ -113,11 +123,29 @@
             }
           } catch (err) {
             this.error = err.response?.data?.message || 'An error occurred during registration';
-            console.error('Registration error!:', err);
+            console.error('Registration error:', err);
           } finally {
             this.loading = false;
           }
+        },
+        toggleTheme() {
+          this.isDarkMode = !this.isDarkMode;
+          localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+          this.applyTheme();
+          // Also set the user preference for dark mode if they register
+          this.userData.darkMode = this.isDarkMode;
+        },
+        applyTheme() {
+          if (this.isDarkMode) {
+            document.body.classList.add('dark-mode');
+          } else {
+            document.body.classList.remove('dark-mode');
+          }
         }
+      },
+      mounted() {
+        this.userData.darkMode = this.isDarkMode;
+        this.applyTheme();
       }
     }).mount('#register-app');
   </script>
