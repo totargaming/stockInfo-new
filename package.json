@@ -1,0 +1,33 @@
+{
+  "name": "stockinfo",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "nodemon ./bin/www",
+    "setup": "node db-setup.js"
+  },
+  "dependencies": {
+    "axios": "^1.8.4",
+    "bcryptjs": "^2.4.3",
+    "colors": "^1.4.0",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "express-session": "^1.18.0",
+    "http-errors": "~1.6.3",
+    "lodash": "^4.17.21",
+    "morgan": "~1.9.1",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "passport-local": "^1.0.0",
+    "session-file-store": "^1.5.0",
+    "sqlite3": "^5.1.7",
+    "uuid": "^9.0.1",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

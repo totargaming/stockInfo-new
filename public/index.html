@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Info Dashboard</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="/stylesheets/stock-components.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</head>
+
+<body>
+  <header class="main-header">
+    <h1 class="page-title">Stock Info Dashboard</h1>
+    <div class="auth-container" id="auth-buttons">
+      <a href="/login" class="auth-btn login-btn" v-if="!user"><i class="fas fa-sign-in-alt"></i> Login</a>
+      <a href="/register" class="auth-btn register-btn" v-if="!user"><i class="fas fa-user-plus"></i> Register</a>
+      <div class="user-info" v-if="user">
+        <span class="welcome-text">Welcome, {{ user.fullName || user.username }}</span>
+        <button @click="logout" class="auth-btn logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <p>Welcome to your stock information dashboard. Here you can view latest stock prices and details.</p>
+
+  <div id="stock-app">
+    <!-- Main app content will be rendered here -->
+    <div v-if="error" class="error-message">
+      <i class="fas fa-exclamation-circle"></i> {{ error }}
+      <button @click="error = null" class="close-btn"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- Home page view -->
+    <div v-if="!selectedStock" class="home-view">
+      <div class="market-summary" v-if="marketSummary && marketSummary.length > 0">
+        <div class="section-header">
+          <h2><i class="fas fa-chart-line"></i> Market Summary</h2>
+        </div>
+        <div class="market-indices">
+          <div v-for="index in marketSummary" :key="index.symbol" class="market-index">
+            <div class="index-name">{{ index.name }}</div>
+            <div class="index-price">${{ index.price.toFixed(2) }}</div>
+            <div :class="['index-change', index.change >= 0 ? 'positive' : 'negative']">
+              {{ index.change >= 0 ? '+' : '' }}{{ index.change.toFixed(2) }}
+              ({{ index.change >= 0 ? '+' : '' }}{{ index.changesPercentage.toFixed(2) }}%)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <div class="featured-stocks" v-if="featuredStocks && featuredStocks.length > 0">
+          <div class="section-header">
+            <h2><i class="fas fa-star"></i> Featured Stocks</h2>
+          </div>
+          <div class="featured-stocks-grid">
+            <div v-for="stock in featuredStocks" :key="stock.symbol" class="featured-stock-card"
+              @click="viewStockDetails(stock.symbol)">
+              <div class="stock-card-header">
+                <div class="stock-symbol">{{ stock.symbol }}</div>
+                <div class="stock-name">{{ stock.name }}</div>
+              </div>
+              <div class="stock-card-price">${{ stock.price.toFixed(2) }}</div>
+              <div :class="['stock-card-change', stock.change >= 0 ? 'positive' : 'negative']">
+                {{ stock.change >= 0 ? '+' : '' }}{{ stock.change.toFixed(2) }}
+                ({{ stock.changesPercentage.toFixed(2) }}%)
+              </div>
+              <div class="stock-card-footer">
+                <button class="view-btn">View Details</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stock-list-section">
+          <div class="section-header">
+            <h2><i class="fas fa-list"></i> Stock List</h2>
+          </div>
+          <stock-list :stocks="stocks" :loading="loading.stocks" @view-stock="viewStockDetails">
+          </stock-list>
+        </div>
+
+        <div class="user-watchlist" v-if="watchlist && watchlist.length > 0">
+          <div class="section-header">
+            <h2><i class="fas fa-star"></i> Your Watchlist</h2>
+          </div>
+          <div class="watchlist-items">
+            <div v-for="item in watchlist" :key="item.symbol" class="watchlist-item"
+              @click="viewStockDetails(item.symbol)">
+              <div class="watchlist-item-symbol">{{ item.symbol }}</div>
+              <div class="watchlist-item-name">{{ item.name || 'Unknown Company' }}</div>
+              <div v-if="item.price" class="watchlist-item-price">${{ item.price.toFixed(2) }}</div>
+              <div v-if="item.change !== undefined"
+                :class="['watchlist-item-change', item.change >= 0 ? 'positive' : 'negative']">
+                {{ item.change >= 0 ? '+' : '' }}{{ item.change.toFixed(2) }}%
+              </div>
+              <button @click.stop="removeFromWatchlist(item.symbol)" class="remove-btn">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stock detail view -->
+    <div v-else class="detail-view">
+      <stock-detail :stock="selectedStock" :profile="stockProfile" :history="stockHistory"
+        :loading="loading.stockDetails" :is-in-watchlist="isInWatchlist" @add-to-watchlist="addToWatchlist"
+        @remove-from-watchlist="removeFromWatchlist" @back="backToList">
+      </stock-detail>
+    </div>
+  </div>
+
+  <script src="./javascripts/main.js"></script>
+  <script src="./javascripts/components/StockList.js"></script>
+  <script src="./javascripts/components/StockDetail.js"></script>
+  <script src="./javascripts/auth.js"></script>
+</body>
+
+</html>
