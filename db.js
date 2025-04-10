@@ -152,7 +152,11 @@ const update = (sql, params = []) => {
                 reject(err);
                 return;
             }
-            resolve(this.changes);
+            // Return both lastID and changes
+            resolve({
+                lastID: this.lastID,
+                changes: this.changes
+            });
         });
     });
 };
